@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'coin_data.dart';
 import 'dart:io' show Platform;
-import 'package:flutter_sparkline/flutter_sparkline.dart';
+
+import 'crypto_details.dart';
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -17,7 +18,9 @@ class _PriceScreenState extends State<PriceScreen> {
     List<DropdownMenuItem<String>> dropdownItems = [];
     for (String currency in currenciesList) {
       var newItem = DropdownMenuItem(
-        child: Text(currency),
+        child: Text(currency,
+              style: TextStyle(fontSize: 22,),
+              ),
         value: currency,
       );
       dropdownItems.add(newItem);
@@ -66,7 +69,6 @@ class _PriceScreenState extends State<PriceScreen> {
       isWaiting = false;
       setState(() {
         coinValues = data;
-        //print(coinValues);
       });
     } catch (e) {
       print(e);
@@ -89,9 +91,12 @@ class _PriceScreenState extends State<PriceScreen> {
           value: isWaiting ? '?' : coinValues[crypto],
           average: isWaiting ? '?' : coinValues[crypto + '_AVERAGE'],
           percent: isWaiting ? '?' : coinValues[crypto + '_CHANGE'],
-          history: (crypto == 'BTC')
-              ? btchistory
-              : (crypto == 'LTC') ? ltchistory : ethhistory,
+          percentDaily: isWaiting ? '?' : coinValues[crypto + '_PERCENT_DAILY'],
+          percentMonthly: isWaiting ? '?' : coinValues[crypto + '_PERCENT_MONTHLY'],
+          openDaily: isWaiting ? '?' : coinValues[crypto + '_OPEN'],
+          high: isWaiting ? '?' : coinValues[crypto + '_DAY_HIGH'],
+          low: isWaiting ? '?' : coinValues[crypto + '_DAY_LOW'],
+          currency: isWaiting ? '?' : coinValues['currency'],
         ),
       );
     }
@@ -102,83 +107,20 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  DataColumn makeDataColumns(String inputLable) {
-    return DataColumn(
-        label: Text(
-      inputLable,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 11.0,
-        fontFamily: 'Oxygen',
-        //fontWeight: FontWeight.w200,
-        letterSpacing: 2,
-        color: Colors.grey.shade300,
-      ),
-    ));
-  }
-
-  DataCell renderDataCell({@required String dataCellLabel, String imageName}) {
-    if (imageName != null) {
-      return DataCell(Row(
-        children: <Widget>[
-          Image.asset(
-            'images/$imageName.png',
-            width: 22.0,
-            height: 22.0,
-          ),
-          SizedBox(width: 15.0),
-          Text(
-            dataCellLabel,
-            //textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20.0,
-              fontFamily: 'Oxygen',
-              fontWeight: FontWeight.w800,
-              letterSpacing: 2,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ));
-    } else {
-      return DataCell(
-        Text(
-          dataCellLabel,
-          style: TextStyle(
-            fontSize: 20.0,
-            fontFamily: 'Oxygen',
-            fontWeight: FontWeight.w800,
-            letterSpacing: 2,
-            color: Colors.white,
-          ),
-        ),
-      );
-    }
-  }
-
-  DataRow renderDataRow(String crypto) {
-    return DataRow(cells: [
-      renderDataCell(dataCellLabel: 'BTC', imageName: 'BTC'),
-      renderDataCell(dataCellLabel: '123'),
-      renderDataCell(dataCellLabel: '456'),
-      renderDataCell(dataCellLabel: '789'),
-    ]);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Center(
             child: Text(
-          'the bitcoin project',
+          'The CryptoCurrency Project',
           textAlign: TextAlign.center,
           style: TextStyle(fontFamily: 'Oxygen'),
         )),
       ),
       body: Column(
-        //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        // mainAxisAlignment: MainAxisAlignment,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
             decoration: BoxDecoration(
@@ -191,37 +133,30 @@ class _PriceScreenState extends State<PriceScreen> {
                 colors: [Colors.blue.shade600, Colors.purple.shade600],
               ),
             ),
-            height: 89.0,
+            height: 70.0,
             alignment: Alignment(0.7, 1),
             margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-            padding: EdgeInsets.only(bottom: 30.0),
+            padding: EdgeInsets.only(bottom: 15.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'CURRENCY',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontFamily: 'Oxygen',
-                    fontWeight: FontWeight.w100,
-                    letterSpacing: 2,
-                    color: Colors.white,
-                  ),
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'CURRENCY',
+                      style: TextStyle(
+                        fontSize: 22.0,
+                        fontFamily: 'Oxygen',
+                        fontWeight: FontWeight.w100,
+                        letterSpacing: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Platform.isIOS ? iOSPicker() : androidDropdown(),
+                  ],
                 ),
-                Platform.isIOS ? iOSPicker() : androidDropdown(),
-              ],
-            ),
           ),
+          Text('For more details, tap on the cards below', style: TextStyle(),),
           makeCards(),
-          // DataTable(columnSpacing: 0.0, columns: [
-          //   makeDataColumns('    CRYPTO'),
-          //   makeDataColumns('CURR'),
-          //   makeDataColumns('    AVG'),
-          //   makeDataColumns('% CHANGE'),
-          // ], rows: [
-          //   renderDataRow('BTC'),
-          // ])
         ],
       ),
     );
@@ -235,17 +170,39 @@ class CryptoCard extends StatelessWidget {
       this.percent,
       this.selectedCurrency,
       this.cryptoCurrency,
-      this.history});
+      this.percentDaily,
+      this.percentMonthly,
+      this.openDaily,
+      this.high,
+      this.low,
+      this.currency,
+      });
 
   final String value;
   final String average;
   final String percent;
   final String selectedCurrency;
   final String cryptoCurrency;
-  final List<double> history;
+  final String percentDaily;
+  final String percentMonthly;
+  final String openDaily;
+  final String high;
+  final String low;
+  final String currency;
+  // final List<double> history;
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: (){
+        Navigator.push(context, 
+        MaterialPageRoute(
+          builder: (context)=>ShowDetails(
+            cryptoCurrency, percentDaily, percent, percentMonthly, openDaily, high, low, currency
+          )
+        )
+        );
+      },
+      child: Container(
         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10.0),
         decoration: BoxDecoration(
           boxShadow: [
@@ -262,21 +219,20 @@ class CryptoCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           //crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Image.asset(
-              'images/$cryptoCurrency.png',
-              height: 70.0,
-              width: 70.5,
-            ),
-            new Sparkline(
-              fallbackHeight: 75.0,
-              fallbackWidth: 90.0,
-              data: history,
-              fillMode: FillMode.below,
-              fillGradient: new LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.blue[800], Colors.blue[200]],
-              ),
+            Column(
+              children: <Widget>[
+                Hero(
+                  tag: "$cryptoCurrency"+"graph",
+                  child: Image.asset(
+                    'images/$cryptoCurrency.png',
+                    height: 70.0,
+                    width: 70.5,
+                  ),
+                ),
+                Text('$cryptoCurrency',
+                  overflow: TextOverflow.clip,
+                ),
+              ],
             ),
             Column(
               children: <Widget>[
@@ -289,31 +245,26 @@ class CryptoCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 10.0),
-                Text('CHANGE: $percent'),
+                Row(
+                  children: <Widget>[
+                    Text(
+                      'CHANGE: $percent', 
+                      style: percent != '?'?
+                      TextStyle(color: double.parse(percent)>0? Colors.lightGreenAccent :Colors.red)
+                      : TextStyle(),
+                    ),
+                    percent != '?'?
+                      double.parse(percent)>0 ?
+                      Icon(Icons.arrow_drop_up, color: Colors.lightGreenAccent,): Icon(Icons.arrow_drop_down, color: Colors.red,):
+                      Icon(null),
+                  ],
+                ),
                 Text('AVG: $average'),
               ],
             )
           ],
-        ));
-
-    // return Card(
-    //   color: Colors.black54,
-    //   elevation: 5.0,
-    //   shape: RoundedRectangleBorder(
-    //     borderRadius: BorderRadius.circular(10.0),
-    //   ),
-    //   child: Padding(
-    //     padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-    //     child: Text(
-    //       '1 $cryptoCurrency = $value $selectedCurrency',
-    //       textAlign: TextAlign.center,
-    //       style: TextStyle(
-    //         fontSize: 20.0,
-    //         fontFamily: 'Oxygen',
-    //         color: Colors.white,
-    //       ),
-    //     ),
-    //   ),
-    // );
+        )
+      )
+    );
   }
 }

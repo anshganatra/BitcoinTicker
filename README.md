@@ -7,3 +7,9 @@ A Flutter based Mobile Application providing Cryptocurrency tracking and Convers
 - Flutter
 - Dart
 - BitcoinAverage API
+
+## Snapshots
+
+
+![Homepage](https://ibb.co/LRdrfwc)
+![Card](https://ibb.co/pK8hV89)

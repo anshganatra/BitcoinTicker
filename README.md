@@ -1,6 +1,6 @@
 # Bitcoin Ticker
 
-A new Flutter project.
+A Flutter based Cryptocurrency tracking Mobile Application.
 
 ## Getting Started
 

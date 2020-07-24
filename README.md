@@ -11,5 +11,5 @@ A Flutter based Mobile Application providing Cryptocurrency tracking and Convers
 ## Snapshots
 
 
-![Homepage](https://ibb.co/LRdrfwc)
-![Card](https://ibb.co/pK8hV89)
+![Homepage](https://i.ibb.co/dM4ty9V/IMG-20200724-150002.jpg)
+![Card](https://i.ibb.co/09Ss4Sd/IMG-20200724-150031.jpg)
